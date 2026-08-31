@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIND OUT</title>
+</head>
+<body>
+    <div>
+        <h1>FIND OUT</h1>
+
+        <div>
+            <div>
+                <input 
+                    type="text" 
+                    id="verseInput" 
+                    placeholder="e.g. John 1:1"
+                >
+                <button id="searchBtn">Search</button>
+            </div>
+        </div>
+
+        <div id="resultContainer" style="display: none;">
+            <div id="resultCard">
+                <span id="resultBadge"></span>
+                <span id="resultReference"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let bibleDatabase = [];
+
+        async function loadBibleData() {
+            try {
+                const response = await fetch('data.json');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                
+                if (Array.isArray(data)) {
+                    bibleDatabase = data;
+                } else {
+                    throw new Error('JSON format is not an array');
+                }
+            } catch (error) {
+                console.error("Could not load data.json:", error);
+                bibleDatabase = [];
+            }
+        }
+
+        function performSearch() {
+            const queryInput = document.getElementById('verseInput').value.trim();
+            const resultContainer = document.getElementById('resultContainer');
+            const resultBadge = document.getElementById('resultBadge');
+            const resultReference = document.getElementById('resultReference');
+
+            if (!queryInput) {
+                resultContainer.style.display = 'block';
+                resultBadge.textContent = "No";
+                resultReference.textContent = "";
+                return;
+            }
+
+            // Check for exact string match in database (case-insensitive and whitespace trimmed)
+            const matchedVerse = bibleDatabase.find(item => {
+                return item.trim().toLowerCase() === queryInput.toLowerCase();
+            });
+
+            resultContainer.style.display = 'block';
+
+            if (matchedVerse) {
+                resultBadge.textContent = "Yes";
+                resultReference.textContent = "";
+            } else {
+                resultBadge.textContent = "No";
+                resultReference.textContent = "";
+            }
+        }
+
+        document.getElementById('searchBtn').addEventListener('click', performSearch);
+        document.getElementById('verseInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        window.onload = function() {
+            loadBibleData();
+        };
+    </script>
+</body>
+</html>
